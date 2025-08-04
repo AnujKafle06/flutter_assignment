@@ -1,5 +1,4 @@
-// lib/home_screen.dart
-
+// home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,11 +14,11 @@ class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   final List<Widget> _screens = const [
-    BlocCounterScreen(),
-    WeatherScreen(),
-    ImagePickerScreen(),
-    TaskCrudScreen(),
-    MoreScreen(),
+    BlocCounterScreen(key: PageStorageKey('BlocCounter')),
+    WeatherScreen(key: PageStorageKey('Weather')),
+    ImagePickerScreen(key: PageStorageKey('ImagePicker')),
+    TaskCrudScreen(key: PageStorageKey('TaskCrud')),
+    MoreScreen(key: PageStorageKey('More')),
   ];
 
   final List<NavigationItem> _navigationItems = const [
@@ -65,51 +64,37 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           _navigationItems[currentIndex].title,
-          style: const TextStyle(fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            inherit: true, // Safe for lerp
+          ),
         ),
-        elevation: 0,
         centerTitle: true,
+        elevation: 0,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
         actions: [
-          IconButton(
-            icon: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: Icon(
-                themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                key: ValueKey(themeProvider.isDarkMode),
-              ),
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            onPressed: () => themeProvider.toggleTheme(),
-            tooltip: themeProvider.isDarkMode ? 'Light Mode' : 'Dark Mode',
+            child: IconButton(
+              icon: Icon(
+                themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                color: Theme.of(context).primaryColor,
+              ),
+              onPressed: () => themeProvider.toggleTheme(),
+              tooltip: themeProvider.isDarkMode ? 'Light Mode' : 'Dark Mode',
+            ),
           ),
         ],
       ),
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        transitionBuilder: (child, animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position:
-                  Tween<Offset>(
-                    begin: const Offset(0.1, 0),
-                    end: Offset.zero,
-                  ).animate(
-                    CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeOutCubic,
-                    ),
-                  ),
-              child: child,
-            ),
-          );
-        },
-        child: Container(
-          key: ValueKey(currentIndex),
-          child: _screens[currentIndex],
-        ),
-      ),
+      body: IndexedStack(index: currentIndex, children: _screens),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
@@ -118,37 +103,78 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
-        child: BottomNavigationBar(
-          currentIndex: currentIndex,
-          onTap: navProvider.updateIndex,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: Theme.of(context).primaryColor,
-          unselectedItemColor: Colors.grey,
-          selectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 12,
+        child: SafeArea(
+          child: Container(
+            height: 70,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: _navigationItems.asMap().entries.map((entry) {
+                final index = entry.key;
+                final item = entry.value;
+                final isSelected = currentIndex == index;
+
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => navProvider.updateIndex(index),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeInOut,
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? Theme.of(context).primaryColor.withOpacity(0.1)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(20),
+                        border: isSelected
+                            ? Border.all(
+                                color: Theme.of(
+                                  context,
+                                ).primaryColor.withOpacity(0.3),
+                                width: 1,
+                              )
+                            : null,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            isSelected ? item.activeIcon : item.icon,
+                            size: isSelected ? 24 : 22,
+                            color: isSelected
+                                ? Theme.of(context).primaryColor
+                                : Colors.grey[600],
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            item.label,
+                            style: TextStyle(
+                              fontSize: isSelected ? 11 : 10,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.grey[600],
+                              inherit: true, // 🔑 Critical for lerp safety
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
           ),
-          unselectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 11,
-          ),
-          items: _navigationItems.map((item) {
-            final isSelected = _navigationItems.indexOf(item) == currentIndex;
-            return BottomNavigationBarItem(
-              icon: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? Theme.of(context).primaryColor.withOpacity(0.1)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(isSelected ? item.activeIcon : item.icon, size: 24),
-              ),
-              label: item.label,
-            );
-          }).toList(),
         ),
       ),
     );

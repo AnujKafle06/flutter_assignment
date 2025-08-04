@@ -1,4 +1,4 @@
 class CounterState {
   final int counter;
-  CounterState(this.counter);
+  const CounterState({required this.counter});
 }

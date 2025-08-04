@@ -1,3 +1,4 @@
+// main.dart
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -27,76 +28,181 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        // Wait for theme initialization
+        if (!themeProvider.isInitialized) {
+          return const MaterialApp(
+            home: Scaffold(body: Center(child: CircularProgressIndicator())),
+          );
+        }
 
-    return MaterialApp(
-      title: "Flutter Modern App",
-      debugShowCheckedModeBanner: false,
-      themeMode: themeProvider.currentTheme,
-      theme: ThemeData(
-        useMaterial3: true, // ✅ Enable Material 3
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: Colors.grey[50],
-        textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
-        appBarTheme: AppBarTheme(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          elevation: 0.5,
-          titleTextStyle: GoogleFonts.poppins(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
+        // Base text theme
+        final baseTextTheme = GoogleFonts.poppinsTextTheme();
+
+        // 🌞 Light Theme
+        final lightTheme = ThemeData(
+          useMaterial3: true,
+          brightness: Brightness.light,
+          scaffoldBackgroundColor: Colors.grey[50],
+          textTheme: baseTextTheme
+              .apply(bodyColor: Colors.black87, displayColor: Colors.black87)
+              .copyWith(
+                displayLarge: baseTextTheme.displayLarge?.copyWith(
+                  inherit: true,
+                  color: Colors.black87,
+                ),
+                displayMedium: baseTextTheme.displayMedium?.copyWith(
+                  inherit: true,
+                  color: Colors.black87,
+                ),
+                displaySmall: baseTextTheme.displaySmall?.copyWith(
+                  inherit: true,
+                  color: Colors.black87,
+                ),
+                headlineLarge: baseTextTheme.headlineLarge?.copyWith(
+                  inherit: true,
+                  color: Colors.black87,
+                ),
+                headlineMedium: baseTextTheme.headlineMedium?.copyWith(
+                  inherit: true,
+                  color: Colors.black87,
+                ),
+                headlineSmall: baseTextTheme.headlineSmall?.copyWith(
+                  inherit: true,
+                  color: Colors.black87,
+                ),
+                titleLarge: baseTextTheme.titleLarge?.copyWith(
+                  inherit: true,
+                  color: Colors.black87,
+                ),
+                bodyLarge: baseTextTheme.bodyLarge?.copyWith(
+                  inherit: true,
+                  color: Colors.black87,
+                ),
+                bodyMedium: baseTextTheme.bodyMedium?.copyWith(
+                  inherit: true,
+                  color: Colors.black87,
+                ),
+                bodySmall: baseTextTheme.bodySmall?.copyWith(
+                  inherit: true,
+                  color: Colors.grey[700],
+                ),
+              ),
+          appBarTheme: AppBarTheme(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
+            elevation: 0.5,
+            titleTextStyle: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ).copyWith(inherit: true),
+            iconTheme: const IconThemeData(color: Colors.black),
           ),
-          iconTheme: const IconThemeData(color: Colors.black),
-        ),
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: Colors.white,
-          elevation: 8,
-          selectedItemColor: Colors.blueAccent,
-          unselectedItemColor: Colors.grey,
-          selectedIconTheme: const IconThemeData(size: 28),
-          unselectedIconTheme: const IconThemeData(size: 24),
-          type: BottomNavigationBarType.fixed,
-          showUnselectedLabels: true,
-        ),
-        // cardTheme: CardTheme(
-        //   shape: RoundedRectangleBorder(
-        //     borderRadius: BorderRadius.circular(16),
-        //   ),
-        //   elevation: 4,
-        //   margin: const EdgeInsets.all(12),
-        // ),
-      ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF121212),
-        textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF121212),
-          foregroundColor: Colors.white,
-          elevation: 0.5,
-          titleTextStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-          iconTheme: IconThemeData(color: Colors.white),
-        ),
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Color(0xFF1F1F1F),
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Colors.grey,
-          selectedIconTheme: IconThemeData(size: 28),
-          unselectedIconTheme: IconThemeData(size: 24),
-          type: BottomNavigationBarType.fixed,
-          showUnselectedLabels: true,
-        ),
-        // cardTheme: CardTheme(
-        //   shape: RoundedRectangleBorder(
-        //     borderRadius: BorderRadius.circular(16),
-        //   ),
-        //   elevation: 4,
-        //   margin: const EdgeInsets.all(12),
-        // ),
-      ),
-      home: const AuthWrapper(),
+          bottomNavigationBarTheme: BottomNavigationBarThemeData(
+            backgroundColor: Colors.white,
+            elevation: 8,
+            selectedItemColor: Colors.blueAccent,
+            unselectedItemColor: Colors.grey,
+            selectedIconTheme: const IconThemeData(size: 28),
+            unselectedIconTheme: const IconThemeData(size: 24),
+            type: BottomNavigationBarType.fixed,
+            showUnselectedLabels: true,
+          ),
+        );
+
+        // 🌙 Dark Theme
+        final darkTheme = ThemeData(
+          useMaterial3: true,
+          brightness: Brightness.dark,
+          scaffoldBackgroundColor: const Color(0xFF121212),
+          cardColor: const Color(0xFF1E1E1E),
+          textTheme: baseTextTheme
+              .apply(bodyColor: Colors.white, displayColor: Colors.white)
+              .copyWith(
+                displayLarge: baseTextTheme.displayLarge?.copyWith(
+                  inherit: true,
+                  color: Colors.white,
+                ),
+                displayMedium: baseTextTheme.displayMedium?.copyWith(
+                  inherit: true,
+                  color: Colors.white,
+                ),
+                displaySmall: baseTextTheme.displaySmall?.copyWith(
+                  inherit: true,
+                  color: Colors.white,
+                ),
+                headlineLarge: baseTextTheme.headlineLarge?.copyWith(
+                  inherit: true,
+                  color: Colors.white,
+                ),
+                headlineMedium: baseTextTheme.headlineMedium?.copyWith(
+                  inherit: true,
+                  color: Colors.white,
+                ),
+                headlineSmall: baseTextTheme.headlineSmall?.copyWith(
+                  inherit: true,
+                  color: Colors.white,
+                ),
+                titleLarge: baseTextTheme.titleLarge?.copyWith(
+                  inherit: true,
+                  color: Colors.white,
+                ),
+                bodyLarge: baseTextTheme.bodyLarge?.copyWith(
+                  inherit: true,
+                  color: Colors.white,
+                ),
+                bodyMedium: baseTextTheme.bodyMedium?.copyWith(
+                  inherit: true,
+                  color: Colors.white,
+                ),
+                bodySmall: baseTextTheme.bodySmall?.copyWith(
+                  inherit: true,
+                  color: Colors.grey[400],
+                ),
+              ),
+          appBarTheme: AppBarTheme(
+            backgroundColor: const Color(0xFF121212),
+            foregroundColor: Colors.white,
+            elevation: 0.5,
+            titleTextStyle: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ).copyWith(inherit: true),
+            iconTheme: const IconThemeData(color: Colors.white),
+          ),
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+            backgroundColor: Color(0xFF1F1F1F),
+            elevation: 8,
+            selectedItemColor: Colors.white,
+            unselectedItemColor: Colors.grey,
+            selectedIconTheme: IconThemeData(size: 28),
+            unselectedIconTheme: IconThemeData(size: 24),
+            type: BottomNavigationBarType.fixed,
+            showUnselectedLabels: true,
+          ),
+        );
+
+        return MaterialApp(
+          title: "Flutter Modern App",
+          debugShowCheckedModeBanner: false,
+          themeMode: themeProvider.currentTheme,
+          theme: lightTheme,
+          darkTheme: darkTheme,
+          home: const AuthWrapper(),
+          // ✅ Fix text scaling to prevent lerp issues
+          builder: (context, child) {
+            return MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.linear(1.0)),
+              child: child!,
+            );
+          },
+        );
+      },
     );
   }
 }
